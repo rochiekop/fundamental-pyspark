@@ -1,0 +1,56 @@
+services:
+  pyspark:
+    hostname: pyspark
+    container_name: pyspark_container
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: pyspark_custom
+    restart: on-failure
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+    ports:
+      - 8888:8888
+      - 4040:4040
+    volumes:
+      - ./:/home/jovyan/work
+    networks:
+      - my_network
+
+
+  pachotel_db:
+    image: postgres:latest
+    hostname: pachotel_db
+    container_name: pachotel_db_container
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB_HOTEL}
+      - POSTGRES_USER=${POSTGRES_USER_HOTEL}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_HOTEL}
+    volumes:
+      - ./postgres_source/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 5433:5432 
+    networks:
+      - my_network
+
+  movie_db:
+    image: postgres:latest
+    hostname: movie_db
+    container_name: movie_db_container
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB_MOVIE}
+      - POSTGRES_USER=${POSTGRES_USER_MOVIE}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_MOVIE}
+    volumes:
+      - ./movie_data/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 5435:5432 
+    networks:
+      - my_network
+  
+networks:
+  my_network:
+    driver: bridge
+
